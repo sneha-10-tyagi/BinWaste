@@ -1,0 +1,55 @@
+#LINEAR REGRESSION
+
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.linear_model import LinearRegression
+
+X = df_balanced[['Distance (cm)']]
+
+y = df_balanced['Fill (%)']
+
+#testing
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = LinearRegression() #untrained
+
+#training
+model.fit(X_train, y_train)
+
+test_score = model.score(X_test, y_test)
+print(f"Model Test Score (R^2): {test_score:.4f}")
+
+# 5-fold cross-validation
+cv_scores = cross_val_score(model, X, y, cv=5)
+
+print(f"Cross-Validation Scores: {cv_scores}")
+print(f"Average Cross-Validation Score: {np.mean(cv_scores):.4f}")
+
+#predictions
+y_pred = model.predict(X_test)
+
+print("First 10 Predictions:", y_pred[:10])
+print("First 10 Actual Values:", y_test[:10].values)
+
+from sklearn.metrics import mean_squared_error, r2_score
+
+r2 = r2_score(y_test, y_pred) #coefficient of determination
+mse = mean_squared_error(y_test, y_pred)
+rmse = mse ** 0.5
+
+print(f'R²: {r2}')
+print(f'MSE: {mse}')
+print(f'RMSE: {rmse}')
+
+
+#plotting
+plt.scatter(X_test['Distance (cm)'], y_test, color='blue', label='Actual values')
+plt.plot(X_test['Distance (cm)'], y_pred, color='red', label='Predicted values')
+plt.title('Distance vs Fill Percentage (Regression Model)')
+plt.xlabel('Distance (cm)')
+plt.ylabel('Fill Percentage (%)')
+plt.legend()
+plt.show()
+
+print(f"Model Coefficients: {model.coef_}")
+print(f"Intercept: {model.intercept_}")
+
