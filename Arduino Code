@@ -1,0 +1,60 @@
+#include <LiquidCrystal.h>
+
+// LCD pin configuration: (RS, E, D4, D5, D6, D7)
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+// Ultrasonic sensor pins
+const int trigPin = 9;
+const int echoPin = 10;
+
+// Bin height in cm (adjust based on your bin size)
+const float binHeight = 25.0;
+
+void setup() {
+  lcd.begin(16, 2);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600);
+
+  lcd.print("Smart Dustbin");
+  delay(2000);
+  lcd.clear();
+}
+
+void loop() {
+  // Trigger the ultrasonic pulse
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Read echo time and convert to distance
+  long duration = pulseIn(echoPin, HIGH);
+  float distance = duration * 0.0343 / 2;
+
+  // Calculate fill percentage
+  float fillPercent = ((binHeight - distance) / binHeight) * 100.0;
+  if (fillPercent < 0) fillPercent = 0;
+  if (fillPercent > 100) fillPercent = 100;
+
+  // Send the data to Serial (Python will collect it here)
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.print(" cm, Fill: ");
+  Serial.print(fillPercent);
+  Serial.println("%");
+
+  // Display on LCD
+  lcd.setCursor(0, 0);
+  lcd.print("Dist: ");
+  lcd.print(distance, 1);
+  lcd.print(" cm   "); // clear leftover chars
+
+  lcd.setCursor(0, 1);
+  lcd.print("Full: ");
+  lcd.print(fillPercent, 1);
+  lcd.print("%     "); // clear leftover chars
+
+  delay(1000); // Update every second
+}
